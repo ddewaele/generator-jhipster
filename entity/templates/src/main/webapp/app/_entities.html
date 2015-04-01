@@ -143,8 +143,8 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th><% for (fieldId in fields) { %>
-                    <th translate="<%=keyPrefix + fields[fieldId].fieldName %>"><%=fields[fieldId].fieldNameCapitalized%></th><% } %><% for (relationshipId in relationships) {
+                    <th ng-click="loadPageSorted('id')">ID</th><% for (fieldId in fields) { %>
+                    <th ng-click="loadPageSorted('<%=fields[fieldId].fieldName %>')" translate="<%=keyPrefix + fields[fieldId].fieldName %>"><%=fields[fieldId].fieldNameCapitalized%></th><% } %><% for (relationshipId in relationships) {
                         if (relationships[relationshipId].relationshipType == 'many-to-one') { %>
                     <th translate="<%= keyPrefix + relationships[relationshipId].relationshipName%>"><%=relationships[relationshipId].relationshipName%></th><% } } %>
                     <th></th>

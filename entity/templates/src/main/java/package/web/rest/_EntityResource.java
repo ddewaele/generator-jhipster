@@ -7,6 +7,7 @@ import <%=packageName%>.web.rest.util.PaginationUtil;<% } %>
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;<% if (pagination != 'no') { %>
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;<% } %>
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,12 @@ import java.util.List;<% if (javaVersion == '8') { %>
 import java.util.Optional;<% } %><% if (databaseType == 'cassandra') { %>
 import java.util.UUID;<% } %>
 
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.web.bind.WebDataBinder;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+
 /**
  * REST controller for managing <%= entityClass %>.
  */
@@ -33,6 +40,11 @@ public class <%= entityClass %>Resource {
 
     @Inject
     private <%= entityClass %>Repository <%= entityInstance %>Repository;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(String[].class, new StringArrayPropertyEditor(null));
+    }
 
     /**
      * POST  /<%= entityInstance %>s -> Create a new <%= entityInstance %>.
@@ -77,9 +89,11 @@ public class <%= entityClass %>Resource {
         log.debug("REST request to get all <%= entityClass %>s");
         return <%= entityInstance %>Repository.findAll();<% } %><% if (pagination != 'no') { %>
     public ResponseEntity<List<<%= entityClass %>>> getAll(@RequestParam(value = "page" , required = false) Integer offset,
-                                  @RequestParam(value = "per_page", required = false) Integer limit)
+                                  @RequestParam(value = "per_page", required = false) Integer limit,@RequestParam(value = "sort", required = false) String[] sortsArray)
         throws URISyntaxException {
-        Page<<%= entityClass %>> page = <%= entityInstance %>Repository.findAll(PaginationUtil.generatePageRequest(offset, limit));
+
+        List<String> sorts = new ArrayList(Arrays.asList(sortsArray));
+        Page<<%= entityClass %>> page = <%= entityInstance %>Repository.findAll(PaginationUtil.generatePageRequest(offset, limit,sorts));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/<%= entityInstance %>s", offset, limit);
         return new ResponseEntity<<% if (javaVersion == '7') { %>List<<%= entityClass %>><% } %>>(page.getContent(), headers, HttpStatus.OK);<% } %>
     }

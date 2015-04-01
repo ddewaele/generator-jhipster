@@ -5,8 +5,9 @@ angular.module('<%=angularAppName%>')
         $scope.<%= entityInstance %>s = [];<% for (idx in differentTypes) { if (differentTypes[idx] != entityClass) { %>
         $scope.<%= differentTypes[idx].toLowerCase() %>s = <%= differentTypes[idx] %>.query();<% } } %><% if (pagination == 'pager' || pagination == 'pagination') { %>
         $scope.page = 1;
+        $scope.sorts = ["id,asc"];
         $scope.loadAll = function() {
-            <%= entityClass %>.query({page: $scope.page, per_page: 20}, function(result, headers) {
+            <%= entityClass %>.query({page: $scope.page, per_page: 20, sort: $scope.sorts}, function(result, headers) {
                 $scope.links = ParseLinks.parse(headers('link'));
                 $scope.<%= entityInstance %>s = result;
             });
@@ -28,7 +29,12 @@ angular.module('<%=angularAppName%>')
         $scope.loadPage = function(page) {
             $scope.page = page;
             $scope.loadAll();
-        };<% } %><% if (pagination == 'no') { %>
+        };
+        $scope.loadPageSorted = function(sortProperty) {
+          var sortOrder = ($scope.sorts[0].split(",")[1] == "desc") ? "asc" : "desc";
+          $scope.sorts = [sortProperty + "," + sortOrder];
+          $scope.loadAll();  
+        } <% } %><% if (pagination == 'no') { %>           
         $scope.loadAll = function() {
             <%= entityClass %>.query(function(result) {
                $scope.<%= entityInstance %>s = result;
